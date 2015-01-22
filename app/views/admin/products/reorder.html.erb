@@ -1,13 +1,60 @@
 <% content_for :head do %>
-  <%= javascript_include_tag :defaults %>
+  <%= javascript_include_tag 'jquery-1.8.2.min.js' %>
+  <%= javascript_include_tag 'jquery-ui.js' %>
+  <%= javascript_include_tag 'jquery.lazyload.min.js' %>
+  <%= javascript_include_tag 'jquery.simulate' %>
+  <%= javascript_include_tag 'jquery.simulate.ext' %>
+  <%= javascript_include_tag 'jquery.simulate.drag-n-drop' %>
+
+  <script type="text/javascript">
+  $( document ).ready(function() {
+
+    var moved = 0;
+
+    $("#item_list").sortable({
+      update: function (event, ui) {
+        var data = $('#item_list').sortable('serialize');
+        //data += '&authenticity_token=' + encodeURIComponent('9d6cAVcUV89aWa5FdF0KGEJ5r1f8tJWuTkaRMhpTBoQ=');
+        moved++;
+        $('#progress span').text("ordinamento elementi: "+moved);
+        $('#progress').slideDown();
+        $.ajax({
+          data: data,
+          type: 'POST',
+          url: 'order_products',
+          success: function( strData ){
+          },
+          error: function(){},
+          complete: function(){
+            moved--;
+            $('#progress span').text("ordinamento elementi: "+moved);
+            if( moved == 0 ) $('#progress').slideUp();
+          }
+        });
+      }
+    });
+
+    $("img.lazy").lazyload();
+
+    $('.move-top').each(function() {
+      $(this).bind("click", function() {
+        var target = $('.move-top').parent().first().position();
+        var object = $(this).parent().position();
+        var xpos = -(object.left - target.left) -1; //we need drag 1 pixel over the center to swap elements
+        var ypos = -(object.top - target.top);
+        $(this).parent().simulate("drag-n-drop", {dx: xpos, dy: ypos})
+        });
+    });
+  });
+  </script>
 <% end %>
 
 <style>
 li.handle {
   cursor: move;
   border: 1px dashed #ccc;
-  list-style: none; 
-  float: left; 
+  list-style: none;
+  float: left;
   display:inline;
   width: 140px;
   height: 140px;
@@ -19,6 +66,10 @@ li.handle .image {
 	display: block;
   	height: 70px;
 }
+.lazy {
+  width:48px;
+  height:48px;
+}
 </style>
 
 <%= render :partial => 'admin/shared/product_sub_menu' %>
@@ -27,18 +78,16 @@ li.handle .image {
 <h3><%= t('reorder_desc') %></h3><br>
 
 	<ul id="item_list" class="clearfix">
-	<% for product in @products %>
-		<% content_tag_for(:li, product, :class=> 'handle') do %>
-			<div class="image">
-				<% if product.images.any? %>
-					<%= image_tag(product.images.first.attachment.url(:mini)) %>
-				<% else %>
-					<%= image_tag('noimage/mini.jpg') %>
-				<% end %>
-			</div>
-			<p><%= product.name %></p>
-		<% end %>
-	<% end %>	
+  	<% for product in @products %>
+  	<% content_tag_for(:li, product, :class=> 'handle') do %>
+      <button class="move-top">move</button>
+      <% if product.images.any? %>
+      <!-- specificare width e height per la classe lazy (http://www.appelsiini.net/projects/lazyload) -->
+      <img class="lazy" data-original="<%= product.images.first.attachment.url(:mini) %>"/>
+      <% else %>
+      <img class="lazy" data-original="/images/noimage/mini.jpg"/>
+      <% end %>
+  		<p><%= product.name %></p>
+  		<% end %>
+  	<% end %>
 	</ul>
-
-<%= sortable_element("item_list", :url => { :action => :order_products }, :handle => "handle", constraint: false, overlap:'horizontal', :axis => "'x,j'") %>
