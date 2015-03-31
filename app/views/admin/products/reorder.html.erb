@@ -72,6 +72,19 @@ li.handle .image {
   width:48px;
   height:48px;
 }
+
+.move-top {
+  width: 30px;
+  float: right;
+  height: 30px;
+  background-image: url(/images/admin/product_ordering/arrow-up.png);
+  padding: 0px;
+}
+
+.move-top:hover {
+  background-image: url(/images/admin/product_ordering/arrow-up-hover.png);
+}
+
 </style>
 
 <%= render :partial => 'admin/shared/product_sub_menu' %>
@@ -82,7 +95,7 @@ li.handle .image {
 	<ul id="item_list" class="clearfix">
   	<% for product in @products %>
   	<% content_tag_for(:li, product, :class=> 'handle') do %>
-      <button class="move-top">move</button>
+      <button class="move-top">&nbsp;</button>
       <% if product.images.any? %>
       <!-- specificare width e height per la classe lazy (http://www.appelsiini.net/projects/lazyload) -->
       <img class="lazy" data-original="<%= product.images.first.attachment.url(:mini) %>"/>
