@@ -5,6 +5,7 @@ Gem::Specification.new do |s|
   s.summary     = 'Add gem summary here'
   #s.description = 'Add (optional) gem description here'
   s.required_ruby_version = '>= 1.8.7'
+  s.author      = 'Nebulab'
 
   # s.author            = 'David Heinemeier Hansson'
   # s.email             = 'david@loudthinking.com'
